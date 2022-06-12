@@ -1,29 +1,53 @@
 package main
 
 import (
-	"fmt"
-	"github.com/anaskhan96/soup"
+	//"fmt"
 	"os"
+
+	"github.com/anaskhan96/soup"
+	log "github.com/sirupsen/logrus"
 )
 
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+	log.SetReportCaller(true)
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
+}
+
 func main() {
-
-
-	resp, err := soup.Get("https://awesome-ui.netlify.app/rank")
+	resp, err := soup.Get("https://keyzard.org/realtimekeyword")
 	if err != nil {
 		os.Exit(1)
 	}
-	fmt.Printf("%s",resp)
+	//fmt.Printf("%s",resp)
 	doc := soup.HTMLParse(resp)
-	links := doc.FindAll("a","data-v-470f41c0")
-	for _, link := range links {
-		fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+	div := doc.FindAll("div", "class", "col-sm-12")
+	for _, d := range div {
+		links := d.FindAll("a")
+		for _, link := range links {
+			rankitem := (link.Attrs()["title"])
+			log.Debug(rankitem)
+			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+		}
 	}
 }
 
-//<a data-v-470f41c0="" data-v-76c55539="" href="https://search.naver.com/search.naver?where=news&amp;sm=tab_jum&amp;query=그것이 알고싶다" target="_blank" class="rank-layer"><span data-v-470f41c0="" class="rank-num">1</span><span data-v-470f41c0="" class="rank-text">그것이 알고싶다</span><span data-v-470f41c0="" class="rank-icon"><i data-v-470f41c0="" class="fi-rr-minus-small"></i></span></a>
+type Keyword struct {
+	RelKeyworkd        string `json:"relKeyword"`           //: "대한민국파라과이",
+	MonthlyPcQcCn      int    `json:"monthlyPcQcCnt"`       //: 9880,
+	MonthlyMobildQcCnt int    `json:"monthlyMobileQcCnt"`   //: 43900,
+	Total              int    `json:"total"`                //: 15939,
+	UpdateDate         int    `json:"updateDate,omitempty"` //: "2022-06-09 13:37:33",
+	KeywordLevel       int    `json:"keywordLevel"`         //: 1,
+}
 
-
-
-
-https://keyzard.org/realtimekeyword
+type RelKeyword struct {
+	List  []Keyword `json:"list,omitempty"`
+	Goole []Keyword `json:"auto_google,omitempty"`
+	Daum  []Keyword `json:"auto_daum,omitempty"`
+	Naver []Keyword `json:"auto_naver,omitempy"`
+}
