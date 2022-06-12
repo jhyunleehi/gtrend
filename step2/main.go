@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -28,25 +29,45 @@ func init() {
 func main() {
 	url := "https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition"
 	method := "POST"
-	relkey := SearchKeyword{}
-	searchkey := SearchKeyword{}
-	searchkey.RelKeyworkd = "행복"
-	searchkey.RequestQr = 10
-	_, err := doRequest(method, url, &searchkey, &relkey)
+	rkey := Association{}
+
+	ntime := time.Now()
+	today := ntime.Format("20060102")
+	yesterday := ntime.AddDate(0, 0, -1).Format("20060102")
+
+	skey := SearchKeyword{}
+	skey.StartDate = yesterday
+	skey.EndDate = today
+	skey.TopN = 100 //500
+	skey.Period = "1"
+	skey.AnalysisMonths = 0
+	skey.CategorySetName = "SMT"
+	skey.Sources = "blog,news,twitter"
+	skey.Keyword = "행복"
+	skey.Synonym = ""
+	skey.KeywordFilterIncludes = ""
+	skey.KeyworkdFilterExcludes = ""
+	skey.IncludeWordOperatros = "||"
+	skey.ExcludeWordOperators = "||"
+	skey.ScoringKeyWord = ""
+	skey.ExForHash = ""
+	skey.CategoryList = "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
+
+	_, err := doRequest(method, url, &skey, &rkey)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	for _, key := range relkey.Goole {
-		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
+	for i, data := range rkey.Item.DataList {
+		for j, rows := range data.Data.Rows {
+			for k, ass := range rows.AssociationData {
+				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, ass.Label, ass.Frequency)
+			}
+		}
+
 	}
-	for _, key := range relkey.Daum {
-		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
-	}
-	for _, key := range relkey.Naver {
-		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
-	}
+
 }
 
 //doRequest ...
