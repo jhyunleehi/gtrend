@@ -1,3 +1,8 @@
+# 트랜드 분석
+
+![image](https://user-images.githubusercontent.com/13324737/173239961-1f8ecdc8-73b0-4ff5-b8c6-8a626a055d1f.png)
+
+
 # 개발환경 설정
 ### 1. vscode 설치 
 
