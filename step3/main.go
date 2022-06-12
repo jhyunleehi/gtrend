@@ -93,8 +93,8 @@ func genLink() []opts.GraphLink {
 		links = append(links, l)
 	}
 
-	for i := 0; i < 100; i += 10 {
-		for j := i + 1; i < j+10; j++ {
+	for i := 0; i < 50; i += 10 {
+		for j := i + 1; j < i+10; j++ {
 			l := opts.GraphLink{}
 			l.Source = graphNodes[i].Name
 			l.Target = graphNodes[j].Name
@@ -196,7 +196,7 @@ func GraphHandler(w http.ResponseWriter, _ *http.Request) {
 	page := components.NewPage()
 	page.AddCharts(
 		graphBase(),
-		graphCircle(),
+		//graphCircle(),
 		//graphNpmDep(),
 		graphBar(),
 	)
