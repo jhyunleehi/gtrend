@@ -26,10 +26,10 @@ func init() {
 }
 
 func main() {
-	url := "https://keyzard.org/query/searchs"
+	url := "https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition"
 	method := "POST"
-	relkey := RelKeyword{}
-	searchkey := SearchKeyworkd{}
+	relkey := SearchKeyword{}
+	searchkey := SearchKeyword{}
 	searchkey.RelKeyworkd = "행복"
 	searchkey.RequestQr = 10
 	_, err := doRequest(method, url, &searchkey, &relkey)
@@ -96,23 +96,49 @@ func doRequest(method, url string, in, out interface{}) (http.Header, error) {
 	return resp.Header, nil
 }
 
-type RelKeyword struct {
-	List  []Keyword `json:"list,omitempty"`
-	Goole []Keyword `json:"auto_google,omitempty"`
-	Daum  []Keyword `json:"auto_daum,omitempty"`
-	Naver []Keyword `json:"auto_naver,omitempty"`
+type SearchKeyword struct {
+	StartDate              string `json:"startDate"`             //: "20220512",
+	EndDate                string `json:"endDate"`               //": "20220611",
+	TopN                   int    `json:"topN"`                  //": 500,
+	Period                 string `json:"period"`                //": "1",
+	AnalysisMonths         int    `json:"analysisMonths"`        //": 0,
+	CategorySetName        string `json:"categorySetName"`       //": "SMT",
+	Sources                string `json:"sources"`               //": "blog,news,twitter",
+	Keyword                string `json:"keyword"`               //": "이정현",
+	Synonym                string `json:"synonym"`               //": null,
+	KeywordFilterIncludes  string `json:"keywordFilterIncludes"` //": null,
+	KeyworkdFilterExcludes string `json:"keywordFilterExclude"`  //s": null,
+	IncludeWordOperatros   string `json:"includeWordOperators"`  //": "||",
+	ExcludeWordOperators   string `json:"excludeWordOperators"`  //": "||",
+	ScoringKeyWord         string `json:"scoringKeyword"`        //": "",
+	ExForHash              string `json:"exForHash"`             //": "",
+	CategoryList           string `json:"categoryList"`          //": "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
 }
 
-type Keyword struct {
-	RelKeyworkd        string `json:"relKeyword"`           //: "대한민국파라과이",
-	MonthlyPcQcCn      int    `json:"monthlyPcQcCnt"`       //: 9880,
-	MonthlyMobildQcCnt int    `json:"monthlyMobileQcCnt"`   //: 43900,
-	Total              int    `json:"total"`                //: 15939,
-	UpdateDate         int    `json:"updateDate,omitempty"` //: "2022-06-09 13:37:33",
-	KeywordLevel       int    `json:"keywordLevel"`         //: 1,
+type Association struct {
+	Item   Item   `json:"item"`
+	Code   string `json:"code"`
+	Errors string `json:"errors"`
+	Error  string `json:"error"`
 }
 
-type SearchKeyworkd struct {
-	RelKeyworkd string `json:"relKeyword"`
-	RequestQr   int    `json:"request_rq"`
+type Item struct {
+	DataList []DataList `json:"dataList"`
+	Keyword  string     `json:"keyworkd"`
+}
+type DataList struct {
+	Source string `json:"source"`
+	Data   Data   `json:"data"`
+}
+type Data struct {
+	Rows        []Row  `json:"rows"`
+	CategoryMap string `json:"categoryMap"`
+}
+type Row struct {
+	date            string            `json:"date"`
+	AssociationData []AssociationData `json:"associationData"`
+}
+type AssociationData struct {
+	Label     string `json:"label"`
+	Frequency int    `json:"frequency"`
 }
