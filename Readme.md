@@ -86,7 +86,7 @@ Unpacking objects: 100% (72/72), done.
 
 
 * git 초기화 설정이 필요할 경우 
-````
+```sh
 C:\Gocode\src\gtrend>git add .
 C:\Gocode\src\gtrend>git commit -m "first commit"
 C:\Gocode\src\gtrend>git push  -u --force origin master
@@ -98,7 +98,7 @@ origin  https://github.com/jhyunleehi/gtrend.git (push)
 ```
 
 * git checkout branch, push
-```
+```sh
 C:\Gocode\src\gtrend>git checkout -b develop
 C:\Gocode\src\gtrend>git push --set-upstream origin develop
 Total 0 (delta 0), reused 0 (delta 0)
@@ -122,7 +122,7 @@ https://keyzard.org/realtimekeyword
 https://signal.bz/ 
 여기는 추출이 잘 안된다. 이유는 나중에 살펴봐야 할듯
 
-```
+```sh
 $ go mod vendor
 ```
 
