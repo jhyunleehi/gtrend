@@ -2,9 +2,16 @@ package main
 
 import (
 	//"fmt"
+	"bytes"
+	"crypto/tls"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"strings"
 
-	"github.com/anaskhan96/soup"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,21 +26,81 @@ func init() {
 }
 
 func main() {
-	resp, err := soup.Get("https://keyzard.org/realtimekeyword")
+	url := "https://keyzard.org/query/searchs"
+	method := "POST"
+	relkey := RelKeyword{}
+	searchkey := SearchKeyworkd{}
+	searchkey.RelKeyworkd = "행복"
+	searchkey.RequestQr = 10
+	_, err := doRequest(method, url, &searchkey, &relkey)
 	if err != nil {
-		os.Exit(1)
+		log.Error(err)
+		return
 	}
-	//fmt.Printf("%s",resp)
-	doc := soup.HTMLParse(resp)
-	div := doc.FindAll("div", "class", "col-sm-12")
-	for _, d := range div {
-		links := d.FindAll("a")
-		for _, link := range links {
-			rankitem := (link.Attrs()["title"])
-			log.Debug(rankitem)
-			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+
+	for _, key := range relkey.Goole {
+		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
+	}
+	for _, key := range relkey.Daum {
+		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
+	}
+	for _, key := range relkey.Naver {
+		log.Debug(key.RelKeyworkd, key.Total, key.UpdateDate)
+	}
+}
+
+//doRequest ...
+func doRequest(method, url string, in, out interface{}) (http.Header, error) {
+	log.Debugf("[%+v] [%+v]", method, url)
+	var inbody []byte
+	var body *bytes.Buffer
+	var req *http.Request
+	if in != nil {
+		inbody, _ = json.Marshal(in)
+		body = bytes.NewBuffer(inbody)
+		req, _ = http.NewRequest(method, url, body)
+	} else {
+		req, _ = http.NewRequest(method, url, nil)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("accept", "application/json")
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := http.Client{Transport: tr}
+	resp, errReq := client.Do(req)
+
+	if errReq != nil {
+		if resp == nil {
+			log.Error(errReq)
+			return nil, errReq
 		}
+		buf, _ := ioutil.ReadAll(resp.Body)
+		msg := fmt.Sprintf("doRequest() error: [%+v] [%+v]", errReq, string(buf))
+		log.Errorf(msg)
+		return nil, errReq
+
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		buf, _ := ioutil.ReadAll(resp.Body)
+		msg := fmt.Sprintf("[%+v]", strings.Replace(string(buf), "\n", " ", 999))
+		log.Errorf(msg)
+		return nil, errors.New(msg)
+
+	}
+	buf, _ := ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal([]byte(buf), out)
+	return resp.Header, nil
+}
+
+type RelKeyword struct {
+	List  []Keyword `json:"list,omitempty"`
+	Goole []Keyword `json:"auto_google,omitempty"`
+	Daum  []Keyword `json:"auto_daum,omitempty"`
+	Naver []Keyword `json:"auto_naver,omitempty"`
 }
 
 type Keyword struct {
@@ -45,9 +112,7 @@ type Keyword struct {
 	KeywordLevel       int    `json:"keywordLevel"`         //: 1,
 }
 
-type RelKeyword struct {
-	List  []Keyword `json:"list,omitempty"`
-	Goole []Keyword `json:"auto_google,omitempty"`
-	Daum  []Keyword `json:"auto_daum,omitempty"`
-	Naver []Keyword `json:"auto_naver,omitempy"`
+type SearchKeyworkd struct {
+	RelKeyworkd string `json:"relKeyword"`
+	RequestQr   int    `json:"request_rq"`
 }
