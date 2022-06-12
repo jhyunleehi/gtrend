@@ -1,54 +1,37 @@
 package main
 
 import (
-	"crypto/tls"
-	"fmt"
-	//"io/ioutil"
-	"log"
-	"net/http"
-	//"strings"
+	//"fmt"
+	"os"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/anaskhan96/soup"
+	log "github.com/sirupsen/logrus"
 )
 
-func ExampleScrape() {
-	// Request the HTML page.
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-
-	res, err := client.Get("https://keyzard.org/realtimekeyword")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-	//buf, _ := ioutil.ReadAll(res.Body)
-	//fmt.Printf("%+v", string(buf))
-	// Load the HTML document
-	//rHtml := strings.NewReader(string(buf))
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%+v", doc)
-
-	// Find the review items
-	doc.Find("a").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
-		//s.Find("button").Each(func(i int, t *goquery.Selection) {
-			band := s.Text()
-			title := s.Text()
-			fmt.Printf("Review %d: %s - %s\n", i, band, title)
-		//})cd .
-
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
 	})
+	log.SetReportCaller(true)
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
 }
 
 func main() {
-	ExampleScrape()
+	resp, err := soup.Get("https://keyzard.org/realtimekeyword")
+	if err != nil {
+		os.Exit(1)
+	}
+	//fmt.Printf("%s",resp)
+	doc := soup.HTMLParse(resp)
+	div := doc.FindAll("div", "class", "col-sm-12")
+	for _, d := range div {
+		links := d.FindAll("a")
+		for _, link := range links {
+			rankitem := (link.Attrs()["title"])
+			log.Debug(rankitem)
+			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+		}
+	}
 }

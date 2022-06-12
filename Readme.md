@@ -106,22 +106,42 @@ To https://github.com/jhyunleehi/gtrend.git
 Branch 'develop' set up to track remote branch 'develop' from 'origin'.
 ```
 
-# step 1. 시그널에서 실시간 검색어 추출
+# step 1. 키자드 검색어 추출
+
+### 리얼타임 검색어
+https://keyzard.org/realtimekeyword
+
+여기서 동적 페이지 분석 해서 키워드  추출
+
 
 https://signal.bz/ 
+여기는 추출이 잘 안된다. 이유는 나중에 살펴봐야 할듯
 
 ```
 $ go mod vendor
 ```
 
+실행 로그 write 한다. 
 
-### 리얼타임 검색어
 
-https://keyzard.org/realtimekeyword
+# step 2. 연관 검색어 추출
 
-여기서 동적 페이지 분석 해서 키워드 뽑으면 되고,
+1. json 프로토콜 이용한 데이터 추출
+2. 함수 예외 처리 방법
+3. 배열 처리 방법
+4. Map 객체 사용하는 방법
+5. time date 연산
 
-### 자동완성 키워드 ---> 연관 검색어 확인.
+###  연관 검색어 추출 
+* 쇼셜 빅데이터 
+https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition
+
+
+### 연관 검색어 추출
+https://keyzard.org/keyzard
+
+여기서 동적 페이지 분석 해서 키워드  추출
+
 
 키워드 마법사에서  
 https://keyzard.org/keyzard
@@ -132,6 +152,44 @@ https://keyzard.org/keyzard
 상태 코드: 200 
 원격 주소: 172.67.170.210:443
 
-응답데이터는 JSON 
+{relKeyword: "검건모", request_qr: "10"}
+relKeyword: "검건모"
+request_qr: "10"
 
-{"auto_google":[{"relKeyword":"대한민국파라과이","monthlyPcQcCnt":9880,"monthlyMobileQcCnt":43900,"qcCnt":0,"total":15939,"updateDate":"2022-06-09 13:37:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 13:37:33"},{"relKeyword":"대한민국축구","monthlyPcQcCnt":9010,"monthlyMobileQcCnt":53200,"qcCnt":0,"total":349975,"updateDate":"2022-06-03 19:22:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"3","compIdx":"높음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-03 19:22:33"},{"relKeyword":"대한민국","monthlyPcQcCnt":58200,"monthlyMobileQcCnt":394500,"qcCnt":0,"total":11996409,"updateDate":"2022-06-12 01:01:18","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-12 01:01:18"},{"relKeyword":"대한민국인구","monthlyPcQcCnt":5900,"monthlyMobileQcCnt":24700,"qcCnt":0,"total":449091,"updateDate":"2022-06-07 16:19:01","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"1","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"1","compIdx":"중간","webTotal":"0","productTotal":"0","keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-07 16:19:01"},{"relKeyword":"대한민국이집트","monthlyPcQcCnt":11700,"monthlyMobileQcCnt":51400,"qcCnt":0,"total":60376,"updateDate":"2022-06-09 13:40:41","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 13:40:41"},{"relKeyword":"대한민국지도","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국축구일정","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국칠레","monthlyPcQcCnt":16200,"monthlyMobileQcCnt":108200,"qcCnt":0,"total":43174,"updateDate":"2022-06-06 12:07:54","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-06 12:07:54"},{"relKeyword":"대한민국파라과이생중계","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국헌법","monthlyPcQcCnt":4160,"monthlyMobileQcCnt":6040,"qcCnt":0,"total":72736,"updateDate":"2022-05-30 10:21:22","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"1","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0.03","monthlyAveMobileCtr":"0.01","plAvgDepth":"8","compIdx":"중간","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-05-30 10:21:22"}],"auto_daum":[{"relKeyword":"대한민국","monthlyPcQcCnt":58200,"monthlyMobileQcCnt":394500,"qcCnt":0,"total":11996409,"updateDate":"2022-06-12 01:01:18","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-12 01:01:18"},{"relKeyword":"대한민국지도","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국인구수","monthlyPcQcCnt":3620,"monthlyMobileQcCnt":14800,"qcCnt":0,"total":31837,"updateDate":"2022-06-07 16:19:01","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-07 16:19:01"},{"relKeyword":"대한민국숙박대전","monthlyPcQcCnt":4910,"monthlyMobileQcCnt":24000,"qcCnt":0,"total":16997,"updateDate":"2022-06-08 08:48:40","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"33.5","monthlyAveMobileClkCnt":"456.5","monthlyAvePcCtr":"0.97","monthlyAveMobileCtr":"2.23","plAvgDepth":"6","compIdx":"중간","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-08 08:48:40"},{"relKeyword":"대한민국구석구석","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국법원","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국역사박물관","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국축구","monthlyPcQcCnt":9010,"monthlyMobileQcCnt":53200,"qcCnt":0,"total":349975,"updateDate":"2022-06-03 19:22:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"3","compIdx":"높음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-03 19:22:33"},{"relKeyword":"대한민국브라질","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국족구협회","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국치킨대전","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국인구","monthlyPcQcCnt":5900,"monthlyMobileQcCnt":24700,"qcCnt":0,"total":449091,"updateDate":"2022-06-07 16:19:01","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"1","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"1","compIdx":"중간","webTotal":"0","productTotal":"0","keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-07 16:19:01"},{"relKeyword":"대한민국칠레","monthlyPcQcCnt":16200,"monthlyMobileQcCnt":108200,"qcCnt":0,"total":43174,"updateDate":"2022-06-06 12:07:54","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-06 12:07:54"},{"relKeyword":"대한민국숙박대전캐시워크","monthlyPcQcCnt":10,"monthlyMobileQcCnt":180,"qcCnt":0,"total":527,"updateDate":"2022-06-08 09:16:32","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":"0","productTotal":"0","keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-08 09:16:32"},{"relKeyword":"대한민국대통령계보","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null}],"list":[{"relKeyword":"대한민국","monthlyAveMobileCtr":0.0,"plAvgDepth":0,"monthlyAvePcCtr":0.0,"total":11996409,"compIdx":"낮음","monthlyPcQcCnt":58200,"monthlyAveMobileClkCnt":0.0,"monthlyMobileQcCnt":394500,"monthlyAvePcClkCnt":0.0}],"auto_naver":[{"relKeyword":"대한민국브라질","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국칠레","monthlyPcQcCnt":16200,"monthlyMobileQcCnt":108200,"qcCnt":0,"total":43174,"updateDate":"2022-06-06 12:07:54","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-06 12:07:54"},{"relKeyword":"대한민국파라과이","monthlyPcQcCnt":9880,"monthlyMobileQcCnt":43900,"qcCnt":0,"total":15939,"updateDate":"2022-06-09 13:37:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 13:37:33"},{"relKeyword":"대한민국파라과이라인업","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국축구","monthlyPcQcCnt":9010,"monthlyMobileQcCnt":53200,"qcCnt":0,"total":349975,"updateDate":"2022-06-03 19:22:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"3","compIdx":"높음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-03 19:22:33"},{"relKeyword":"대한민국지도","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국베트남","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국태국","monthlyPcQcCnt":3260,"monthlyMobileQcCnt":20700,"qcCnt":0,"total":121657,"updateDate":"2022-06-09 03:16:18","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":"0","productTotal":"0","keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 03:16:18"},{"relKeyword":"대한민국말레이시아","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null},{"relKeyword":"대한민국브라질중계","monthlyPcQcCnt":0,"monthlyMobileQcCnt":0,"qcCnt":0,"total":0,"updateDate":null,"errorCode":0,"keywordLevel":0,"garbageKeyword":0,"monthlyAvePcClkCnt":null,"monthlyAveMobileClkCnt":null,"monthlyAvePcCtr":null,"monthlyAveMobileCtr":null,"plAvgDepth":null,"compIdx":null,"webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":null}]}
+
+응답데이터는 JSON 
+```json
+{"auto_google":[{"relKeyword":"대한민국파라과이","monthlyPcQcCnt":9880,"monthlyMobileQcCnt":43900,"qcCnt":0,"total":15939,"updateDate":"2022-06-09 13:37:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 13:37:33"},{"relKeyword":"대한민국축구","monthlyPcQcCnt":9010,"monthlyMobileQcCnt":53200,"qcCnt":0,"total":349975,"updateDate":"2022-06-03 19:22:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"3","compIdx":"높음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-03 19:22:33"}, ...
+````
+
+### naver 개발센터 등록
+
+네이버 오픈API를 사용하려면 먼저 네이버 개발자 센터에서 애플리케이션을 등록하고 클라이언트 아이디와 클라이언트 시크릿을 발급받아야 합니다.
+
+클라이언트 아이디와 클라이언트 시크릿은 인증된 사용자인지를 확인하는 수단이며, 애플리케이션이 등록되면 발급됩니다. 클라이언트 아이디와 클라이언트 시크릿을 네이버 오픈API를 호출할 때 HTTP 헤더에 포함해서 전송해야 API를 호출할 수 있습니다. API 사용량은 클라이언트 아이디별로 합산됩니다.
+
+1. https://developers.naver.com
+
+* 개발자 페이지 접속 
+
+2.  계정 정보 등록
+
+3. ClientID 발급
+```
+ADL5C7Yjg4C7MvZfBUb2
+```
+* client secret
+```
+TrisTl8wVF
+```
+
+
+# step 3. Graph 출력
+
+* https://github.com/go-echarts/go-echarts
+
+[https://github.com/go-echarts/go-echarts](https://github.com/go-echarts/go-echarts)
+
+* https://github.com/go-echarts/examples
+
+[https://github.com/go-echarts/examples](https://github.com/go-echarts/examples)
