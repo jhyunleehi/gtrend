@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"strconv"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/components"
@@ -41,15 +42,66 @@ func httpserver(w http.ResponseWriter, _ *http.Request) {
 	line.Render(w)
 }
 
-var graphNodes = []opts.GraphNode{
-	{Name: "Node1"},
-	{Name: "Node2"},
-	{Name: "Node3"},
-	{Name: "Node4"},
-	{Name: "Node5"},
-	{Name: "Node6"},
-	{Name: "Node7"},
-	{Name: "Node8"},
+func graphBar() *charts.Line {
+	line := charts.NewLine()
+	// set some global options like Title/Legend/ToolTip or anything else
+	line.SetGlobalOptions(
+		charts.WithInitializationOpts(opts.Initialization{Theme: types.ThemeWesteros}),
+		charts.WithTitleOpts(opts.Title{
+			Title:    "Line example in Westeros theme",
+			Subtitle: "Line chart rendered by the http server this time",
+		}))
+
+	// Put data into instance
+	line.SetXAxis([]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}).
+		AddSeries("Category A", generateLineItems()).
+		AddSeries("Category B", generateLineItems()).
+		SetSeriesOptions(charts.WithLineChartOpts(opts.LineChart{Smooth: true}))
+	return line
+}
+
+var graphNodes = []opts.GraphNode{}
+
+// 	{Name: "Node1"},
+// 	{Name: "Node2"},
+// 	{Name: "Node3"},
+// 	{Name: "Node4"},
+// 	{Name: "Node5"},
+// 	{Name: "Node6"},
+// 	{Name: "Node7"},
+// 	{Name: "Node8"},
+// }
+
+func genNodes() []opts.GraphNode {
+	for i := 0; i < 100; i++ {
+		node := opts.GraphNode{}
+		node.Name = "node" + strconv.Itoa(i)
+		graphNodes = append(graphNodes, node)
+	}
+	node := opts.GraphNode{}
+	node.Name = "node100"
+	graphNodes = append(graphNodes, node)
+	return graphNodes
+}
+
+func genLink() []opts.GraphLink {
+	links := make([]opts.GraphLink, 0)
+	for i := 0; i < 100; i += 10 {
+		l := opts.GraphLink{}
+		l.Source = "node100"
+		l.Target = graphNodes[i].Name
+		links = append(links, l)
+	}
+
+	for i := 0; i < 100; i += 10 {
+		for j := i + 1; i < j+10; j++ {
+			l := opts.GraphLink{}
+			l.Source = graphNodes[i].Name
+			l.Target = graphNodes[j].Name
+			links = append(links, l)
+		}
+	}
+	return links
 }
 
 func genLinks() []opts.GraphLink {
@@ -67,7 +119,7 @@ func graphBase() *charts.Graph {
 	graph.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{Title: "basic graph example"}),
 	)
-	graph.AddSeries("graph", graphNodes, genLinks(),
+	graph.AddSeries("graph", genNodes(), genLink(),
 		charts.WithGraphChartOpts(
 			opts.GraphChart{
 				Force:              &opts.GraphForce{Repulsion: 8000},
@@ -146,13 +198,14 @@ func GraphHandler(w http.ResponseWriter, _ *http.Request) {
 		graphBase(),
 		graphCircle(),
 		//graphNpmDep(),
+		graphBar(),
 	)
 
 	page.Render(w)
 }
 
 func main() {
-	http.HandleFunc("/", httpserver)
+	http.HandleFunc("/", GraphHandler)
 	http.HandleFunc("/graph", GraphHandler)
 	http.ListenAndServe(":8081", nil)
 }
