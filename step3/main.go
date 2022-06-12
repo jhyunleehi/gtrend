@@ -73,6 +73,7 @@ var graphNodes = []opts.GraphNode{}
 // }
 
 func genNodes() []opts.GraphNode {
+	graphNodes = []opts.GraphNode{}
 	for i := 0; i < 100; i++ {
 		node := opts.GraphNode{}
 		node.Name = "node" + strconv.Itoa(i)
