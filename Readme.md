@@ -1,17 +1,15 @@
-# 트랜드 분석
+## 트랜드 분석
 
 ![image](https://user-images.githubusercontent.com/13324737/173239961-1f8ecdc8-73b0-4ff5-b8c6-8a626a055d1f.png)
 
 
-# 개발환경 설정
-### 1. vscode 설치 
 
-* vs code 다운로드
-
-[https://code.visualstudio.com/download](https://code.visualstudio.com/download)
+## 개발환경 설정
 
 
-### 2. go lang 설치 
+
+### 1. go lang 설치 
+
 * go 언어
 
 >GO 프로그래밍 언어는 2007년 구글에서 개발을 시작하여 2012년 GO 버젼 1.0을 완성하였다. GO는 이후 계속 향상된 버젼을 내 놓았으며 2022년 초에는 버젼 1.18 에 이르렀다.
@@ -41,7 +39,18 @@ GOROOT=C:\Go
 ```
 Path 설정에  `C:\Gocode\bin;C:\Go\bin` 추가 
 
-## vs code에서 go tool 설치
+
+
+### 2. vscode 설치 
+
+* vs code 다운로드
+
+[https://code.visualstudio.com/download](https://code.visualstudio.com/download)
+
+
+
+#### vs code에서 go tool 설치
+
 vs code에서 ctl-shift-p 누른 상태에서  `Go:Install Update 선택`
 
 ```
@@ -70,6 +79,13 @@ go: C:\Gocode\src\gtrend\go.mod already exists
 C:\Gocode\src\gtrend>go mod vendor
 ```
 
+
+
+### 3. git  설정
+
+* 다운로드 및 설치 
+
+https://git-scm.com/book/ko/v2
 
 #### git 설정
 
@@ -111,13 +127,24 @@ To https://github.com/jhyunleehi/gtrend.git
 Branch 'develop' set up to track remote branch 'develop' from 'origin'.
 ```
 
-# step 1. 키자드 검색어 추출
 
-### 리얼타임 검색어
+
+### 4. Post man 설치 
+
+https://www.postman.com/
+
+
+
+## 단계별 프로그램 개발 
+
+
+
+### step 1. 키자드 검색어 추출
+
+#### 리얼타임 검색어
 https://keyzard.org/realtimekeyword
 
 여기서 동적 페이지 분석 해서 키워드  추출
-
 
 https://signal.bz/ 
 여기는 추출이 잘 안된다. 이유는 나중에 살펴봐야 할듯
@@ -129,7 +156,7 @@ $ go mod vendor
 실행 로그 write 한다. 
 
 
-# step 2. 연관 검색어 추출
+### step 2. 연관 검색어 추출
 
 1. json 프로토콜 이용한 데이터 추출
 2. 함수 예외 처리 방법
@@ -137,12 +164,12 @@ $ go mod vendor
 4. Map 객체 사용하는 방법
 5. time date 연산
 
-###  연관 검색어 추출 
+####  연관 검색어 추출 
 * 쇼셜 빅데이터 
 https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition
 
 
-### 연관 검색어 추출
+#### 연관 검색어 추출
 https://keyzard.org/keyzard
 
 여기서 동적 페이지 분석 해서 키워드  추출
@@ -167,7 +194,7 @@ request_qr: "10"
 {"auto_google":[{"relKeyword":"대한민국파라과이","monthlyPcQcCnt":9880,"monthlyMobileQcCnt":43900,"qcCnt":0,"total":15939,"updateDate":"2022-06-09 13:37:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0","plAvgDepth":"0","compIdx":"낮음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-09 13:37:33"},{"relKeyword":"대한민국축구","monthlyPcQcCnt":9010,"monthlyMobileQcCnt":53200,"qcCnt":0,"total":349975,"updateDate":"2022-06-03 19:22:33","errorCode":0,"keywordLevel":1,"garbageKeyword":0,"monthlyAvePcClkCnt":"0","monthlyAveMobileClkCnt":"0.3","monthlyAvePcCtr":"0","monthlyAveMobileCtr":"0.01","plAvgDepth":"3","compIdx":"높음","webTotal":null,"productTotal":null,"keyword":null,"ip":null,"uuid":null,"type":null,"upDt":null,"update_date":"2022-06-03 19:22:33"}, ...
 ````
 
-### naver 개발센터 등록
+#### naver 개발센터 등록
 
 네이버 오픈API를 사용하려면 먼저 네이버 개발자 센터에서 애플리케이션을 등록하고 클라이언트 아이디와 클라이언트 시크릿을 발급받아야 합니다.
 
@@ -189,7 +216,8 @@ TrisTl8wVF
 ```
 
 
-# step 3. Graph 출력
+
+### step 3. Graph 출력
 
 * https://github.com/go-echarts/go-echarts
 
@@ -198,3 +226,41 @@ TrisTl8wVF
 * https://github.com/go-echarts/examples
 
 [https://github.com/go-echarts/examples](https://github.com/go-echarts/examples)
+
+
+
+### step 4. heap map 
+
+https://github.com/go-echarts/go-echarts
+
+
+
+![image-20220613224218862](img/image-20220613224218862.png)
+
+
+
+### step5. 스케줄링
+
+
+
+
+
+### step6. 통합
+
+
+
+
+
+### step7. Web 서비스
+
+
+
+
+
+
+
+
+
+
+
+### 
