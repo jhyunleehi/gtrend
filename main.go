@@ -5,15 +5,6 @@ import (
 	"time"
 )
 
-// func init() {
-// 	log.SetFormatter(&log.TextFormatter{
-// 		DisableColors: true,
-// 		FullTimestamp: true,
-// 	})
-// 	log.SetReportCaller(true)
-// 	log.SetOutput(os.Stdout)
-// 	log.SetLevel(log.DebugLevel)
-// }
 
 func main() {
 	t:=trend.NewTrend("trend")

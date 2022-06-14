@@ -2,6 +2,8 @@ package trend
 
 import (
 	"bytes"
+	"sync"
+
 	//"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -17,9 +19,12 @@ import (
 )
 
 type Trend struct {
-	Keyword    map[string]Attrs            //실검
-	RelKeyword map[string]map[string]Attrs //연관검색어
-	done       chan struct{}
+	KeywordData    map[string]Attrs            //실검
+	RelKeywordData map[string]map[string]Attrs //연관검색어
+	Keyword        map[string]Attrs            //실검
+	RelKeyword     map[string]map[string]Attrs //연관검색어
+	done           chan struct{}
+	mutex          sync.Mutex
 }
 
 type Attrs struct {
@@ -52,7 +57,7 @@ func (t *Trend) AddKeyword(name string, attr Attrs) error {
 }
 
 func (t *Trend) AddRelKeyword(from string, to string, A Attrs) error {
-	log.Debugf("[%s] [%s] [%+v]", from,to,A)
+	log.Debugf("[%s] [%s] [%+v]", from, to, A)
 	if _, exists := t.RelKeyword[from]; !exists {
 		t.RelKeyword[from] = make(map[string]Attrs)
 		t.RelKeyword[from][to] = A
@@ -85,6 +90,10 @@ func (t *Trend) Run() error {
 			return nil
 		case <-tickerGetKeyWord.C:
 			log.Info("ticker=> GetKeyWord")
+			t.KeywordData = t.Keyword
+			t.RelKeywordData = t.RelKeyword
+			t.Keyword = map[string]Attrs{}
+			t.RelKeyword = map[string]map[string]Attrs{}
 			err := t.GetRealTimeKeyword1() //keyzard
 			if err != nil {
 				log.Error(err)
@@ -148,11 +157,12 @@ func (t *Trend) GetRealTimeKeyword2() error {
 		links := d.FindAll("a")
 		for _, link := range links {
 			rankitem := link.Text()
-			log.Debug(rankitem)
+			label := strings.ReplaceAll(rankitem, " ", "")
+			log.Debug(label)
 			attr := Attrs{}
 			attr.Count = 0
 			attr.Source = ""
-			t.AddKeyword(rankitem, attr)
+			t.AddKeyword(label, attr)
 		}
 	}
 	return nil
@@ -205,11 +215,13 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 	for i, data := range rkey.Item.DataList {
 		for j, rows := range data.Data.Rows {
 			for k, ass := range rows.AssociationData {
-				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, ass.Label, ass.Frequency)
+				label := strings.ReplaceAll(ass.Label, " ", "")
+				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, label, ass.Frequency)
 				attr := Attrs{}
 				attr.Count = ass.Frequency
 				attr.Source = data.Source
-				t.AddRelKeyword(searchword, ass.Label, attr)
+				t.AddKeyword(label, attr)
+				t.AddRelKeyword(searchword, label, attr)
 			}
 		}
 	}
@@ -231,14 +243,14 @@ func (t *Trend) doRequest(method, url string, in, out interface{}) (http.Header,
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("accept", "application/json")
-	
+
 	// tr := &http.Transport{
 	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	// }
 	//client := http.Client{Transport: tr}
-	
+
 	client := http.Client{
-		Timeout:   30 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	resp, errReq := client.Do(req)
 
