@@ -2,38 +2,57 @@ package trend
 
 import (
 	"bytes"
+	//"crypto/tls"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/anaskhan96/soup"
 	log "github.com/sirupsen/logrus"
 )
 
-type Attrs struct {
-	Comefrom string
-	Count    int
+type Trend struct {
+	Keyword    map[string]Attrs            //실검
+	RelKeyword map[string]map[string]Attrs //연관검색어
+	done       chan struct{}
 }
 
-type Trend struct {
-	Keyword    map[string]string           //실검
-	RelKeyword map[string]map[string]Attrs //연관검색어
+type Attrs struct {
+	Source string
+	Count  int
 }
 
 func NewTrend(name string) *Trend {
 	log.Debugf("%s", name)
-	return &Trend{
-		Keyword:    make(map[string]string),
+	trend := Trend{
+		Keyword:    make(map[string]Attrs),
 		RelKeyword: make(map[string]map[string]Attrs),
 	}
+	return &trend
 }
 
-func (t *Trend) AddKeyword(name string) error {
-	log.Debugf("%s", name)
-	t.Keyword[name] = name
+func (t *Trend) AddKeyword(name string, attr Attrs) error {
+	log.Debugf("[%s][%v]", name, attr)
+	if _, exists := t.Keyword[name]; !exists {
+		t.Keyword[name] = attr
+	} else {
+		k := t.Keyword[name]
+		a := Attrs{
+			Count:  k.Count + attr.Count,
+			Source: attr.Source,
+		}
+		t.Keyword[name] = a
+	}
 	return nil
 }
 
 func (t *Trend) AddRelKeyword(from string, to string, A Attrs) error {
+	log.Debugf("[%s] [%s] [%+v]", from,to,A)
 	if _, exists := t.RelKeyword[from]; !exists {
 		t.RelKeyword[from] = make(map[string]Attrs)
 		t.RelKeyword[from][to] = A
@@ -49,205 +68,202 @@ func (t *Trend) PrintKeywordData() error {
 	}
 	for k1, v1 := range t.RelKeyword {
 		for k2, v2 := range v1 {
-			log.Debugf("[%s]-->[%s] [%s]", k1, k2, t.GetString(v2.Attrs))
+			log.Debugf("[%s]-->[%s] [%s][%d]", k1, k2, v2.Source, v2.Count)
 		}
 	}
 	return nil
 }
 
-func (t *Trend) GetList(a map[string]string) []string {
-	str := []string{}
-	for k, atr := range a {
-		str = append(str, fmt.Sprintf("%s=%q", k, atr))
-	}
-	return str
-}
-func (g *Graph
-	) GetString(a map[string]string) string { //[괄호안의 속성]
-	return strings.Join(g.GetList(a), " ")
-}
-func (g *Graph) GetLines(a map[string]string) string {
-	str := strings.Join(g.GetList(a), "; ")
-	return fmt.Sprintf("%s; ", str)
-}
-
-func (g *Graph) CreateHpe3par(stg *model.StorageSpec) error {
-
-	d := &hpe3par.Driver{}
-	if err := d.Setup(stg); err == nil {
-		defer d.Unset()
-	}
-	g.group = []string{"PORT", "VLAN", "IP", "VHOST", "VOL", "CPG", "RAID", "DISK"}
-
-	portlist, _ := d.Client.GetPortsSys()
-	vhostlist, _ := d.Client.GetVhostSys()
-	vollist, _ := d.Client.GetVolumeSys()
-	vlunlist, _ := d.Client.GetVLunSys()
-	cpglist, _ := d.Client.GetCpgSys()
-	disklist, _ := d.Client.GetPhysicalDisk()
-	//Group
-	for _, list := range g.group {
-		g.AddNode(list, list, &Node{Attrs: map[string]string{"label": list, "shape": "plaintext"}})
-	}
-	//Port
-	for _, port := range *portlist {
-		if port.Type != 8 {
+// Run starts countbeat.
+func (t *Trend) Run() error {
+	log.Debug("running get keyword...")
+	tickerGetKeyWord := time.NewTicker(conf.Collect)
+	for {
+		select {
+		case <-t.done:
+			log.Debug("get ticker get bt.done")
+			return nil
+		case <-tickerGetKeyWord.C:
+			log.Info("ticker=> GetKeyWord")
+			err := t.GetRealTimeKeyword1() //keyzard
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			err = t.GetRealTimeKeyword2() //mzum
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			err = t.GetRelKeyword()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 			continue
 		}
-		id := fmt.Sprintf("%d:%d:%d", port.PortPos.Node, port.PortPos.Slot, port.PartnerPos.CardPort)
-		g.AddNode("PORT", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
 	}
-	//VLAN
-	for _, port := range *portlist {
-		portid := fmt.Sprintf("%d:%d:%d", port.PortPos.Node, port.PortPos.Slot, port.PartnerPos.CardPort)
-		for _, vlan := range port.ISCSIVLans {
-			id := fmt.Sprintf("VLAN:%s-%d", portid, vlan.VlanTag)
-			g.AddNode("VLAN", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-		}
-	}
-	//IP
-	for _, port := range *portlist {
-		for _, vlan := range port.ISCSIVLans {
-			id := fmt.Sprintf("IP:%s", vlan.IPAddr)
-			g.AddNode("IP", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-		}
-	}
-	//VHOST
-	for _, vhost := range *vhostlist {
-		id := fmt.Sprintf("VHOST:%s", vhost.Name)
-		g.AddNode("VHOST", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-	}
-	//VOL
-	for _, vol := range *vollist {
-		id := fmt.Sprintf("VOL:%s", vol.VolumeName)
-		g.AddNode("VOL", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-	}
-	//CPG
-	for _, cpg := range *cpglist {
-		id := fmt.Sprintf("CPG:%s", cpg.VolumePoolName)
-		g.AddNode("CPG", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-	}
-	//RAID
-	for _, cpg := range *cpglist {
-		var raidtype int
-		switch cpg.SDGrowth.LDlayout.RAIDType {
-		case 1:
-			raidtype = 0
-		case 2:
-			raidtype = 1
-		case 3:
-			raidtype = 5
-		case 4:
-			raidtype = 6
+}
 
-		}
-		id := fmt.Sprintf("RAID:%d", raidtype)
-		g.AddNode("RAID", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-	}
-	//Disk
-	for _, disk := range *disklist {
-		id := fmt.Sprintf("DISK%d:%d:%d:%d", disk.CageID, disk.CageSide, disk.Mag, disk.DiskPos)
-		g.AddNode("DISK", id, &Node{Attrs: map[string]string{"label": id, "shape": "box"}})
-	}
-	//Port -> VLAN
-	for _, port := range *portlist {
-		from := fmt.Sprintf("%d:%d:%d", port.PortPos.Node, port.PortPos.Slot, port.PartnerPos.CardPort)
-		for _, vlan := range port.ISCSIVLans {
-			to := fmt.Sprintf("VLAN:%s-%d", from, vlan.VlanTag)
-			g.AddEdge(from, to, &Edge{Attrs: map[string]string{"label": from}})
-		}
-	}
-	//VLAN->IP
-	for _, port := range *portlist {
-		portid := fmt.Sprintf("%d:%d:%d", port.PortPos.Node, port.PortPos.Slot, port.PartnerPos.CardPort)
-		for _, vlan := range port.ISCSIVLans {
-			from := fmt.Sprintf("VLAN:%s-%d", portid, vlan.VlanTag)
-			to := fmt.Sprintf("IP:%s", vlan.IPAddr)
-			g.AddEdge(from, to, &Edge{Attrs: map[string]string{"label": from}})
-		}
-	}
-	//IP->HOST
-	for _, vhost := range *vhostlist {
-		for _, iscsipath := range vhost.ISCSIPaths {
-			hostport := fmt.Sprintf("%d:%d:%d", iscsipath.PortPos.Node, iscsipath.PortPos.Slot, iscsipath.PortPos.CardPort)
-			for _, port := range *portlist {
-				portid := fmt.Sprintf("%d:%d:%d", port.PortPos.Node, port.PortPos.Slot, port.PortPos.CardPort)
-				if hostport == portid {
-					for _, vlan := range port.ISCSIVLans {
-						from := fmt.Sprintf("IP:%s", vlan.IPAddr)
-						to := fmt.Sprintf("VHOST:%s", vhost.Name)
-						g.AddEdge(from, to, &Edge{Attrs: map[string]string{"label": from}})
-					}
-				}
-			}
-		}
-	}
-	//VHOST->VOL(VLUN)
-	for _, vlun := range *vlunlist {
-		from := fmt.Sprintf("VHOST:%s", vlun.HostName)
-		to := fmt.Sprintf("VOL:%s", vlun.VolumeName)
-		g.AddEdge(from, to, &Edge{Attrs: map[string]string{"label": from}})
-	}
+// Stop stops countbeat.
+func (t *Trend) Stop() {
+	close(t.done)
+}
 
-	//VOL->CPG
-	for _, vol := range *vollist {
-		from := fmt.Sprintf("VOL:%s", vol.VolumeName)
-		to := fmt.Sprintf("CPG:%s", vol.UserCPG)
-		g.AddEdge(from, to, &Edge{Attrs: map[string]string{"label": from}})
+func (t *Trend) GetRealTimeKeyword1() error {
+	log.Debug()
+	resp, err := soup.Get("https://keyzard.org/realtimekeyword")
+	if err != nil {
+		log.Error(err)
+		return err
 	}
-	//CPG->RAID
-	raidmap := map[string]string{}
-	for _, cpg := range *cpglist {
-		var raidtype int
-		switch cpg.SDGrowth.LDlayout.RAIDType {
-		case 1:
-			raidtype = 0
-		case 2:
-			raidtype = 1
-		case 3:
-			raidtype = 5
-		case 4:
-			raidtype = 6
-		}
-		str := fmt.Sprintf("RAID:%d", raidtype)
-		raidmap[str] = str
-		from := fmt.Sprintf("CPG:%s", cpg.VolumePoolName)
-		to := fmt.Sprintf("RAID:%d", raidtype)
-		g.AddEdge(from, to, &Edge{Attrs: map[string]string{}})
-	}
-	//RAID->DISK
-	for _, disk := range *disklist {
-		to := fmt.Sprintf("DISK%d:%d:%d:%d", disk.CageID, disk.CageSide, disk.Mag, disk.DiskPos)
-		for _, raid := range raidmap {
-			from := fmt.Sprintf("%s", raid)
-			g.AddEdge(from, to, &Edge{Attrs: map[string]string{}})
+	//fmt.Printf("%s",resp)
+	doc := soup.HTMLParse(resp)
+	div := doc.FindAll("div", "class", "col-sm-12")
+	for _, d := range div {
+		links := d.FindAll("a")
+		for _, link := range links {
+			rankitem := (link.Attrs()["title"])
+			log.Debug(rankitem)
+			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+			attr := Attrs{}
+			attr.Count = 0
+			attr.Source = ""
+			t.AddKeyword(rankitem, attr)
 		}
 	}
 	return nil
 }
 
-func main() {
-	//targets := []string{"netapp", "hpe3par", "ceph"}
-	targets := []string{"netapp", "hpe3par"}
-	storagelist := []model.StorageSpec{}
-
-	for _, stg := range storagelist {
-		g := NewGraph(stg.StorageVendor)
-		switch stg.StorageVendor {
-		case "hpe3par":
-
-			g.CreateHpe3par(&stg)
-
-			var buf bytes.Buffer
-			g.WriteDot(&buf)
-			//WriteDot(os.Stdout, g)
-			fmt.Printf("%s", buf.String())
-			filename := fmt.Sprintf("%s_%d", stg.StorageVendor, stg.StorageId)
-			writeErr := ioutil.WriteFile(filename+".gv", []byte(buf.String()), 0755)
-			if writeErr != nil {
-				log.Fatalf("%v\n", writeErr)
-			}
-			DotToImage(filename, "svg", []byte(buf.String()))
+func (t *Trend) GetRealTimeKeyword2() error {
+	log.Debug()
+	resp, err := soup.Get("https://awesome-ui.netlify.app/mzum")
+	if err != nil {
+		os.Exit(1)
+	}
+	//fmt.Printf("%s",resp)
+	doc := soup.HTMLParse(resp)
+	div := doc.FindAll("div", "class", "issue-keyword")
+	for _, d := range div {
+		links := d.FindAll("a")
+		for _, link := range links {
+			rankitem := link.Text()
+			log.Debug(rankitem)
+			attr := Attrs{}
+			attr.Count = 0
+			attr.Source = ""
+			t.AddKeyword(rankitem, attr)
 		}
 	}
+	return nil
+}
+
+func (t *Trend) GetRelKeyword() error {
+	log.Debug()
+	for key, _ := range t.Keyword {
+		err := t.GetRelKeywordItem(key)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (t *Trend) GetRelKeywordItem(searchword string) error {
+	log.Debugf("[%s]", searchword)
+	url := "https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition"
+	method := "POST"
+	rkey := Association{}
+	ntime := time.Now()
+	today := ntime.Format("20060102")
+	yesterday := ntime.AddDate(0, 0, -1).Format("20060102")
+	skey := SearchKeyword{}
+	skey.StartDate = yesterday
+	skey.EndDate = today
+	skey.TopN = 100 //500
+	skey.Period = "1"
+	skey.AnalysisMonths = 0
+	skey.CategorySetName = "SMT"
+	skey.Sources = "blog,news,twitter"
+	skey.Keyword = searchword
+	skey.Synonym = ""
+	skey.KeywordFilterIncludes = ""
+	skey.KeyworkdFilterExcludes = ""
+	skey.IncludeWordOperatros = "||"
+	skey.ExcludeWordOperators = "||"
+	skey.ScoringKeyWord = ""
+	skey.ExForHash = ""
+	skey.CategoryList = "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
+
+	_, err := t.doRequest(method, url, &skey, &rkey)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	for i, data := range rkey.Item.DataList {
+		for j, rows := range data.Data.Rows {
+			for k, ass := range rows.AssociationData {
+				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, ass.Label, ass.Frequency)
+				attr := Attrs{}
+				attr.Count = ass.Frequency
+				attr.Source = data.Source
+				t.AddRelKeyword(searchword, ass.Label, attr)
+			}
+		}
+	}
+	return nil
+}
+
+//doRequest ...
+func (t *Trend) doRequest(method, url string, in, out interface{}) (http.Header, error) {
+	log.Debugf("[%+v] [%+v]", method, url)
+	var inbody []byte
+	var body *bytes.Buffer
+	var req *http.Request
+	if in != nil {
+		inbody, _ = json.Marshal(in)
+		body = bytes.NewBuffer(inbody)
+		req, _ = http.NewRequest(method, url, body)
+	} else {
+		req, _ = http.NewRequest(method, url, nil)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("accept", "application/json")
+	
+	// tr := &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	// }
+	//client := http.Client{Transport: tr}
+	
+	client := http.Client{
+		Timeout:   30 * time.Second,
+	}
+	resp, errReq := client.Do(req)
+
+	if errReq != nil {
+		if resp == nil {
+			log.Error(errReq)
+			return nil, errReq
+		}
+		buf, _ := ioutil.ReadAll(resp.Body)
+		msg := fmt.Sprintf("doRequest() error: [%+v] [%+v]", errReq, string(buf))
+		log.Errorf(msg)
+		return nil, errReq
+
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		buf, _ := ioutil.ReadAll(resp.Body)
+		msg := fmt.Sprintf("[%+v]", strings.Replace(string(buf), "\n", " ", 999))
+		log.Errorf(msg)
+		return nil, errors.New(msg)
+
+	}
+	buf, _ := ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal([]byte(buf), out)
+	return resp.Header, nil
 }
