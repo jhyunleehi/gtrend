@@ -1,0 +1,10 @@
+collect: 10
+
+# Logging Setting (Using Logrus)
+logging:
+  level: debug    #trace, debug, info, warning, error, fatal, panic
+  formatter: text   #text/json
+  writer:  file
+  directory: logs
+  caller_tracing: true    #true/false
+  coloring: false    #true/false
