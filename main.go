@@ -1,26 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"gtrend/trend"
-	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/components"
 	"net/http"
 )
+
 var mytrend *trend.Trend
-
-func GraphHandler(w http.ResponseWriter, _ *http.Request) {
-	page := components.NewPage()
-	page.AddCharts(
-		//graphBase(),		
-		//graphBar(),
-		mytrend.WcBase(),
-	)
-
-	page.Render(w)
-}
 
 func main() {
 	mytrend = trend.NewTrend("trend")
 	go mytrend.Run()
-
-
+	http.HandleFunc("/", mytrend.GraphHandler)
+	http.HandleFunc("/graph", mytrend.GraphHandler)
+	http.ListenAndServe(":8081", nil)
+	fmt.Printf("running server at http://localhost:8081")
 }

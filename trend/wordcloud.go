@@ -1,6 +1,10 @@
 package trend
 
 import (
+	"net/http"
+
+	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/components"
+
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	log "github.com/sirupsen/logrus"
@@ -31,4 +35,14 @@ func (t *Trend) generateWCData(data map[string]int) (items []opts.WordCloudData)
 		items = append(items, opts.WordCloudData{Name: k, Value: v})
 	}
 	return
+}
+
+func (t *Trend) GraphHandler(w http.ResponseWriter, _ *http.Request) {
+	page := components.NewPage()
+	page.AddCharts(
+		//graphBase(),
+		//graphBar(),
+		t.WcBase(),
+	)
+	page.Render(w)
 }
