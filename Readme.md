@@ -279,11 +279,151 @@ func wcBase() *charts.WordCloud {
 
 ### step5. 스케줄링
 
+#### trend Package  만들기
+
+```go
+type Trend struct {
+	KeywordData    map[string]Attrs            //실검
+	RelKeywordData map[string]map[string]Attrs //연관검색어
+	Keyword        map[string]Attrs            //실검
+	RelKeyword     map[string]map[string]Attrs //연관검색어
+	done           chan struct{}
+	mutex          sync.Mutex
+}
+
+type Attrs struct {
+	Source string
+	Count  int
+}
+```
+
+#### 스케쥴링 
+
+```go
+// Run starts countbeat.
+func (t *Trend) Run() error {
+	log.Debug("running get keyword...")
+	tickerGetKeyWord := time.NewTicker(conf.Collect)
+	for {
+		select {
+		case <-t.done:
+			log.Debug("get ticker get bt.done")
+			return nil
+		case <-tickerGetKeyWord.C:
+			log.Info("ticker=> GetKeyWord")
+			t.KeywordData = t.Keyword
+			t.RelKeywordData = t.RelKeyword
+			t.Keyword = map[string]Attrs{}
+			t.RelKeyword = map[string]map[string]Attrs{}
+			err := t.GetRealTimeKeyword1() //keyzard
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			err = t.GetRealTimeKeyword2() //mzum
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			err = t.GetRelKeyword()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			continue
+		}
+	}
+}
+```
+
+#### 실시간 검색어  수집
+
+```go
+func (t *Trend) GetRealTimeKeyword1() error {
+	log.Debug()
+	resp, err := soup.Get("https://keyzard.org/realtimekeyword")
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	//fmt.Printf("%s",resp)
+	doc := soup.HTMLParse(resp)
+	div := doc.FindAll("div", "class", "col-sm-12")
+	for _, d := range div {
+		links := d.FindAll("a")
+		for _, link := range links {
+			rankitem := (link.Attrs()["title"])
+			log.Debug(rankitem)
+			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
+			attr := Attrs{}
+			attr.Count = 0
+			attr.Source = ""
+			t.AddKeyword(rankitem, attr)
+		}
+	}
+	return nil
+}
+```
 
 
 
+#### 연관검색어 수집 : REST-API
 
-### step6. 통합
+```go
+func (t *Trend) GetRelKeywordItem(searchword string) error {
+	log.Debugf("[%s]", searchword)
+	url := "https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition"
+	method := "POST"
+	rkey := Association{}
+	ntime := time.Now()
+	today := ntime.Format("20060102")
+	yesterday := ntime.AddDate(0, 0, -1).Format("20060102")
+	skey := SearchKeyword{}
+	skey.StartDate = yesterday
+	skey.EndDate = today
+	skey.TopN = 100 //500
+	skey.Period = "1"
+	skey.AnalysisMonths = 0
+	skey.CategorySetName = "SMT"
+	skey.Sources = "blog,news,twitter"
+	skey.Keyword = searchword
+	skey.Synonym = ""
+	skey.KeywordFilterIncludes = ""
+	skey.KeyworkdFilterExcludes = ""
+	skey.IncludeWordOperatros = "||"
+	skey.ExcludeWordOperators = "||"
+	skey.ScoringKeyWord = ""
+	skey.ExForHash = ""
+	skey.CategoryList = "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
+
+	_, err := t.doRequest(method, url, &skey, &rkey)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	for i, data := range rkey.Item.DataList {
+		for j, rows := range data.Data.Rows {
+			for k, ass := range rows.AssociationData {
+				label := strings.ReplaceAll(ass.Label, " ", "")
+				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, label, ass.Frequency)
+				attr := Attrs{}
+				attr.Count = ass.Frequency
+				attr.Source = data.Source
+				t.AddKeyword(label, attr)
+				t.AddRelKeyword(searchword, label, attr)
+			}
+		}
+	}
+	return nil
+}
+```
+
+
+
+### step6  키워드 화면 표시
+
+### 
 
 
 

@@ -19,9 +19,9 @@ import (
 )
 
 type Trend struct {
-	KeywordData    map[string]Attrs            //실검
+	KeywordData    map[string]int              //실검
 	RelKeywordData map[string]map[string]Attrs //연관검색어
-	Keyword        map[string]Attrs            //실검
+	Keyword        map[string]int              //실검
 	RelKeyword     map[string]map[string]Attrs //연관검색어
 	done           chan struct{}
 	mutex          sync.Mutex
@@ -35,23 +35,20 @@ type Attrs struct {
 func NewTrend(name string) *Trend {
 	log.Debugf("%s", name)
 	trend := Trend{
-		Keyword:    make(map[string]Attrs),
+		Keyword:    make(map[string]int),
 		RelKeyword: make(map[string]map[string]Attrs),
 	}
 	return &trend
 }
 
-func (t *Trend) AddKeyword(name string, attr Attrs) error {
-	log.Debugf("[%s][%v]", name, attr)
+func (t *Trend) AddKeyword(name string, count int) error {
+	log.Debugf("[%s][%d]", name, count)
 	if _, exists := t.Keyword[name]; !exists {
-		t.Keyword[name] = attr
+		t.Keyword[name] = count
 	} else {
 		k := t.Keyword[name]
-		a := Attrs{
-			Count:  k.Count + attr.Count,
-			Source: attr.Source,
-		}
-		t.Keyword[name] = a
+		sum := k + count
+		t.Keyword[name] = sum
 	}
 	return nil
 }
@@ -92,7 +89,7 @@ func (t *Trend) Run() error {
 			log.Info("ticker=> GetKeyWord")
 			t.KeywordData = t.Keyword
 			t.RelKeywordData = t.RelKeyword
-			t.Keyword = map[string]Attrs{}
+			t.Keyword = map[string]int{}
 			t.RelKeyword = map[string]map[string]Attrs{}
 			err := t.GetRealTimeKeyword1() //keyzard
 			if err != nil {
@@ -135,10 +132,7 @@ func (t *Trend) GetRealTimeKeyword1() error {
 			rankitem := (link.Attrs()["title"])
 			log.Debug(rankitem)
 			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
-			attr := Attrs{}
-			attr.Count = 0
-			attr.Source = ""
-			t.AddKeyword(rankitem, attr)
+			t.AddKeyword(rankitem, 0)
 		}
 	}
 	return nil
@@ -159,10 +153,7 @@ func (t *Trend) GetRealTimeKeyword2() error {
 			rankitem := link.Text()
 			label := strings.ReplaceAll(rankitem, " ", "")
 			log.Debug(label)
-			attr := Attrs{}
-			attr.Count = 0
-			attr.Source = ""
-			t.AddKeyword(label, attr)
+			t.AddKeyword(label, 0)
 		}
 	}
 	return nil
@@ -220,7 +211,7 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 				attr := Attrs{}
 				attr.Count = ass.Frequency
 				attr.Source = data.Source
-				t.AddKeyword(label, attr)
+				t.AddKeyword(label, ass.Frequency)
 				t.AddRelKeyword(searchword, label, attr)
 			}
 		}
