@@ -3,7 +3,7 @@ package main
 import (
 	//"fmt"
 	"bytes"
-	"crypto/tls"
+	//"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,18 +38,18 @@ func main() {
 	skey := SearchKeyword{}
 	skey.StartDate = yesterday
 	skey.EndDate = today
-	skey.TopN = 100 //500
+	skey.TopN = 500
 	skey.Period = "1"
 	skey.AnalysisMonths = 0
 	skey.CategorySetName = "SMT"
 	skey.Sources = "blog,news,twitter"
 	skey.Keyword = "행복"
-	skey.Synonym = ""
-	skey.KeywordFilterIncludes = ""
-	skey.KeyworkdFilterExcludes = ""
+	//skey.Synonym = ""
+	//skey.KeywordFilterIncludes = ""
+	//skey.KeyworkdFilterExcludes = ""
 	skey.IncludeWordOperatros = "||"
 	skey.ExcludeWordOperators = "||"
-	skey.ScoringKeyWord = ""
+	skey.ScoringKeyWord = "행복"
 	skey.ExForHash = ""
 	skey.CategoryList = "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
 
@@ -72,7 +72,7 @@ func main() {
 
 //doRequest ...
 func doRequest(method, url string, in, out interface{}) (http.Header, error) {
-	log.Debugf("[%+v] [%+v]", method, url)
+	log.Debugf("[%+v] [%+v] [%+v]", method, url, in)
 	var inbody []byte
 	var body *bytes.Buffer
 	var req *http.Request
@@ -84,11 +84,18 @@ func doRequest(method, url string, in, out interface{}) (http.Header, error) {
 		req, _ = http.NewRequest(method, url, nil)
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("accept", "application/json")
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	req.Header.Add("Accept", "application/json")
+	// tr := &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	// }
+	//client := http.Client{Transport: tr}
+	client := http.Client{
+		//Transport: tr,
+		Timeout: 30 * time.Second,
 	}
-	client := http.Client{Transport: tr}
+	log.Debug(client)
+
+	//client1 := http.Client{	}
 	resp, errReq := client.Do(req)
 
 	if errReq != nil {
@@ -118,22 +125,22 @@ func doRequest(method, url string, in, out interface{}) (http.Header, error) {
 }
 
 type SearchKeyword struct {
-	StartDate              string `json:"startDate"`             //: "20220512",
-	EndDate                string `json:"endDate"`               //": "20220611",
-	TopN                   int    `json:"topN"`                  //": 500,
-	Period                 string `json:"period"`                //": "1",
-	AnalysisMonths         int    `json:"analysisMonths"`        //": 0,
-	CategorySetName        string `json:"categorySetName"`       //": "SMT",
-	Sources                string `json:"sources"`               //": "blog,news,twitter",
-	Keyword                string `json:"keyword"`               //": "이정현",
-	Synonym                string `json:"synonym"`               //": null,
-	KeywordFilterIncludes  string `json:"keywordFilterIncludes"` //": null,
-	KeyworkdFilterExcludes string `json:"keywordFilterExclude"`  //s": null,
-	IncludeWordOperatros   string `json:"includeWordOperators"`  //": "||",
-	ExcludeWordOperators   string `json:"excludeWordOperators"`  //": "||",
-	ScoringKeyWord         string `json:"scoringKeyword"`        //": "",
-	ExForHash              string `json:"exForHash"`             //": "",
-	CategoryList           string `json:"categoryList"`          //": "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
+	StartDate              string `json:"startDate"`                       //: "20220512",
+	EndDate                string `json:"endDate"`                         //": "20220611",
+	TopN                   int    `json:"topN"`                            //": 500,
+	Period                 string `json:"period"`                          //": "1",
+	AnalysisMonths         int    `json:"analysisMonths"`                  //": 0,
+	CategorySetName        string `json:"categorySetName"`                 //": "SMT",
+	Sources                string `json:"sources"`                         //": "blog,news,twitter",
+	Keyword                string `json:"keyword"`                         //": "이정현",
+	Synonym                string `json:"synonym,omitempty"`               //": null,
+	KeywordFilterIncludes  string `json:"keywordFilterIncludes,omitempty"` //": null,
+	KeyworkdFilterExcludes string `json:"keywordFilterExclude,omitempty"`  //s": null,
+	IncludeWordOperatros   string `json:"includeWordOperators"`            //": "||",
+	ExcludeWordOperators   string `json:"excludeWordOperators"`            //": "||",
+	ScoringKeyWord         string `json:"scoringKeyword"`                  //": "",
+	ExForHash              string `json:"exForHash"`                       //": "",
+	CategoryList           string `json:"categoryList"`                    //": "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
 }
 
 type Association struct {
