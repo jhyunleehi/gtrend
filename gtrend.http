@@ -1,0 +1,26 @@
+@targetip=192.168.56.1
+@storageauth=Basic YWRtaW46MTIzNHF3ZXI=
+
+###
+POST  https://m.some.co.kr/sometrend/analysis/composite/v2/association-transition
+Content-Type:application/json
+Accept:application/json
+
+{
+  "startDate": "20220613",
+  "endDate": "20220614",
+  "topN": 500,
+  "period": "1",
+  "analysisMonths": 0,
+  "categorySetName": "SMT",
+  "sources": "blog,news,twitter",
+  "keyword": "행복",
+  "synonym": null,
+  "keywordFilterIncludes": null,
+  "keywordFilterExcludes": null,
+  "includeWordOperators": "||",
+  "excludeWordOperators": "||",
+  "scoringKeyword": "",
+  "exForHash": "",
+  "categoryList": "politician,celebrity,sportsman,characterEtc,government,business,agency,groupEtc,tourism,restaurant,shopping,scene,placeEtc,brandFood,cafe,brandBeverage,brandElectronics,brandFurniture,brandBeauty,brandFashion,brandEtc,productFood,productBeverage,productElectronics,productFurniture,productBeauty,productFashion,productEtc,economy,social,medicine,education,culture,sports,cultureEtc,animal,plant,naturalPhenomenon,naturalEtc"
+}

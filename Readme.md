@@ -229,13 +229,51 @@ TrisTl8wVF
 
 
 
-### step 4. heap map 
-
 https://github.com/go-echarts/go-echarts
 
 
 
 ![image-20220613224218862](img/image-20220613224218862.png)
+
+### step4. 단어카드 
+
+<img src="img/52348737-01fb8a80-2a60-11e9-94ac-dacbd7b58811.png" alt="img" style="zoom:33%;" />
+
+### 
+
+```go
+var wcData = map[string]interface{}{
+	"대한민국":  10000,
+	"미국":    6181,
+	"이탈리아":  4386,
+	"그리스":   4055,
+	"영국":    2467,
+	"프랑스":   2244,
+	"호주":    1898,
+	"싱가포르":  1484,
+	"인도네시아": 1689,
+	"노르웨이":  1112,
+	"덴마크":   985,
+	"브라질":   847,
+}
+
+func wcBase() *charts.WordCloud {
+	wc := charts.NewWordCloud()
+	wc.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "basic WordCloud example",
+		}))
+
+	wc.AddSeries("wordcloud", generateWCData(wcData)).
+		SetSeriesOptions(
+			charts.WithWorldCloudChartOpts(
+				opts.WordCloudChart{
+					SizeRange: []float32{14, 80},
+				}),
+		)
+	return wc
+}
+```
 
 
 
@@ -252,6 +290,8 @@ https://github.com/go-echarts/go-echarts
 
 
 ### step7. Web 서비스
+
+
 
 
 
