@@ -39,7 +39,7 @@ GOROOT=C:\Program Files\Go
 ```
 Path 설정에  `C:\Gocode\bin;C:\Go\bin` 추가 
 
-![image-20220615194625730](C:\gocode\src\gtrend\img\image-20220615194625730.png)
+![image-20220615194625730](img/image-20220615194625730.png)
 
 ```go
 $ go run main.go
