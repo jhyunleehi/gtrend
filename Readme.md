@@ -35,9 +35,22 @@ c:\Go
 ```sh
 D:\Code\lk>set
 GOPATH=C:\Gocode
-GOROOT=C:\Go
+GOROOT=C:\Program Files\Go
 ```
 Path 설정에  `C:\Gocode\bin;C:\Go\bin` 추가 
+
+![image-20220615194625730](C:\gocode\src\gtrend\img\image-20220615194625730.png)
+
+```go
+$ go run main.go
+$ go build -mod vendor main.go
+$ main.exe 
+
+$ go mod init
+$ go mod vendor
+```
+
+
 
 
 
