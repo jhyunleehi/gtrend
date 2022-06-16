@@ -157,11 +157,9 @@ var wcData = map[string]interface{}{
 
 func wcBase() *charts.WordCloud {
 	wc := charts.NewWordCloud()
-	wc.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{
-			Title: "basic WordCloud example",
-		}))
-
+	globalOptionInit := charts.WithInitializationOpts(opts.Initialization{Theme: types.ThemeWesteros, Width: "1800px", Height: "1000px"})
+	globalOptionTitle := charts.WithTitleOpts(opts.Title{Title: "basic WordCloud example"})
+	wc.SetGlobalOptions(globalOptionInit, globalOptionTitle)
 	wc.AddSeries("wordcloud", generateWCData(wcData)).
 		SetSeriesOptions(
 			charts.WithWorldCloudChartOpts(

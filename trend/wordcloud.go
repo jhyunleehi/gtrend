@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/components"
+	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/types"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -22,7 +23,7 @@ func (t *Trend) WcBase() *charts.WordCloud {
 	wc.SetSeriesOptions(
 		charts.WithWorldCloudChartOpts(
 			opts.WordCloudChart{
-				SizeRange: []float32{14, 80},
+				SizeRange: []float32{10, 80},
 			}),
 	)
 	return wc
@@ -45,4 +46,24 @@ func (t *Trend) GraphHandler(w http.ResponseWriter, _ *http.Request) {
 		t.WcBase(),
 	)
 	page.Render(w)
+}
+
+func (t *Trend) GraphHandler1(w http.ResponseWriter, _ *http.Request) {
+	wc := charts.NewWordCloud()
+	globalOptionInit := charts.WithInitializationOpts(opts.Initialization{Theme: types.ThemeWesteros, Width: "1800px", Height: "1000px"})
+	globalOptionTielt := charts.WithTitleOpts(opts.Title{Title: "실시간 검색어를 이용한 Trend 분석"})
+	wc.SetGlobalOptions(globalOptionInit, globalOptionTielt)
+	wc.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "실시간 검색어를 이용한 Trend 분석",
+		}))
+
+	wc.AddSeries("wordcloud", t.generateWCData(t.KeywordData))
+	wc.SetSeriesOptions(
+		charts.WithWorldCloudChartOpts(
+			opts.WordCloudChart{
+				SizeRange: []float32{10, 80},
+			}),
+	)
+	wc.Render(w)
 }
