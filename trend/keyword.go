@@ -2,6 +2,8 @@ package trend
 
 import (
 	"bytes"
+	"sync"
+
 	//"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -17,9 +19,12 @@ import (
 )
 
 type Trend struct {
-	Keyword    map[string]Attrs            //실검
-	RelKeyword map[string]map[string]Attrs //연관검색어
-	done       chan struct{}
+	KeywordData    map[string]int              //실검
+	RelKeywordData map[string]map[string]Attrs //연관검색어
+	Keyword        map[string]int              //실검
+	RelKeyword     map[string]map[string]Attrs //연관검색어
+	done           chan struct{}
+	mutex          sync.Mutex
 }
 
 type Attrs struct {
@@ -30,29 +35,26 @@ type Attrs struct {
 func NewTrend(name string) *Trend {
 	log.Debugf("%s", name)
 	trend := Trend{
-		Keyword:    make(map[string]Attrs),
+		Keyword:    make(map[string]int),
 		RelKeyword: make(map[string]map[string]Attrs),
 	}
 	return &trend
 }
 
-func (t *Trend) AddKeyword(name string, attr Attrs) error {
-	log.Debugf("[%s][%v]", name, attr)
+func (t *Trend) AddKeyword(name string, count int) error {
+	log.Debugf("[%s][%d]", name, count)
 	if _, exists := t.Keyword[name]; !exists {
-		t.Keyword[name] = attr
+		t.Keyword[name] = count
 	} else {
 		k := t.Keyword[name]
-		a := Attrs{
-			Count:  k.Count + attr.Count,
-			Source: attr.Source,
-		}
-		t.Keyword[name] = a
+		sum := k + count
+		t.Keyword[name] = sum
 	}
 	return nil
 }
 
 func (t *Trend) AddRelKeyword(from string, to string, A Attrs) error {
-	log.Debugf("[%s] [%s] [%+v]", from,to,A)
+	log.Debugf("[%s] [%s] [%+v]", from, to, A)
 	if _, exists := t.RelKeyword[from]; !exists {
 		t.RelKeyword[from] = make(map[string]Attrs)
 		t.RelKeyword[from][to] = A
@@ -85,6 +87,10 @@ func (t *Trend) Run() error {
 			return nil
 		case <-tickerGetKeyWord.C:
 			log.Info("ticker=> GetKeyWord")
+			t.KeywordData = t.Keyword
+			t.RelKeywordData = t.RelKeyword
+			t.Keyword = map[string]int{}
+			t.RelKeyword = map[string]map[string]Attrs{}
 			err := t.GetRealTimeKeyword1() //keyzard
 			if err != nil {
 				log.Error(err)
@@ -126,10 +132,7 @@ func (t *Trend) GetRealTimeKeyword1() error {
 			rankitem := (link.Attrs()["title"])
 			log.Debug(rankitem)
 			//fmt.Println(link.Text(), "| Link :", link.Attrs()["href"])
-			attr := Attrs{}
-			attr.Count = 0
-			attr.Source = ""
-			t.AddKeyword(rankitem, attr)
+			t.AddKeyword(rankitem, 0)
 		}
 	}
 	return nil
@@ -148,11 +151,9 @@ func (t *Trend) GetRealTimeKeyword2() error {
 		links := d.FindAll("a")
 		for _, link := range links {
 			rankitem := link.Text()
-			log.Debug(rankitem)
-			attr := Attrs{}
-			attr.Count = 0
-			attr.Source = ""
-			t.AddKeyword(rankitem, attr)
+			label := strings.ReplaceAll(rankitem, " ", "")
+			log.Debug(label)
+			t.AddKeyword(label, 0)
 		}
 	}
 	return nil
@@ -205,11 +206,13 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 	for i, data := range rkey.Item.DataList {
 		for j, rows := range data.Data.Rows {
 			for k, ass := range rows.AssociationData {
-				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, ass.Label, ass.Frequency)
+				label := strings.ReplaceAll(ass.Label, " ", "")
+				log.Debugf("ITEM [%d][%d][%d] [%s] [%d] ", i, j, k, label, ass.Frequency)
 				attr := Attrs{}
 				attr.Count = ass.Frequency
 				attr.Source = data.Source
-				t.AddRelKeyword(searchword, ass.Label, attr)
+				t.AddKeyword(label, ass.Frequency)
+				t.AddRelKeyword(searchword, label, attr)
 			}
 		}
 	}
@@ -231,14 +234,14 @@ func (t *Trend) doRequest(method, url string, in, out interface{}) (http.Header,
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("accept", "application/json")
-	
+
 	// tr := &http.Transport{
 	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	// }
 	//client := http.Client{Transport: tr}
-	
+
 	client := http.Client{
-		Timeout:   30 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	resp, errReq := client.Do(req)
 

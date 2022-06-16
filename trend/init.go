@@ -73,8 +73,7 @@ func init() {
 	}
 	log.Debug(logFile)
 	
-	log.SetOutput(logFile)
-	
-	//log.SetOutput(os.Stdout)
+	//log.SetOutput(logFile)	
+	log.SetOutput(os.Stdout)
 
 }

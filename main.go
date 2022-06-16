@@ -1,23 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"gtrend/trend"
-	"time"
+	"net/http"
 )
 
-// func init() {
-// 	log.SetFormatter(&log.TextFormatter{
-// 		DisableColors: true,
-// 		FullTimestamp: true,
-// 	})
-// 	log.SetReportCaller(true)
-// 	log.SetOutput(os.Stdout)
-// 	log.SetLevel(log.DebugLevel)
-// }
+var mytrend *trend.Trend
 
 func main() {
-	t:=trend.NewTrend("trend")
-	go t.Run()
-	time.Sleep(120*time.Second)
-
+	mytrend = trend.NewTrend("trend")
+	go mytrend.Run()
+	http.HandleFunc("/", mytrend.GraphHandler)
+	http.HandleFunc("/graph", mytrend.GraphHandler)
+	http.ListenAndServe(":8081", nil)
+	fmt.Printf("running server at http://localhost:8081")
 }
