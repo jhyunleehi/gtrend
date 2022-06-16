@@ -10,6 +10,7 @@ var mytrend *trend.Trend
 
 func main() {
 	mytrend = trend.NewTrend("trend")
+	mytrend.GetInit()
 	go mytrend.Run()
 	http.HandleFunc("/", mytrend.GraphHandler)
 	http.HandleFunc("/wc", mytrend.GraphHandler1)

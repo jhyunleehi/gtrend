@@ -3,8 +3,8 @@ package trend
 import (
 	"net/http"
 
-	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/components"
-	"gtrend/vendor/github.com/go-echarts/go-echarts/v2/types"
+	"github.com/go-echarts/go-echarts/v2/components"
+	"github.com/go-echarts/go-echarts/v2/types"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -62,7 +62,7 @@ func (t *Trend) GraphHandler1(w http.ResponseWriter, _ *http.Request) {
 	wc.SetSeriesOptions(
 		charts.WithWorldCloudChartOpts(
 			opts.WordCloudChart{
-				SizeRange: []float32{10, 80},
+				SizeRange: []float32{10, 100},
 			}),
 	)
 	wc.Render(w)

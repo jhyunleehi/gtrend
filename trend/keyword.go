@@ -77,9 +77,34 @@ func (t *Trend) PrintKeywordData() error {
 }
 
 // Run starts countbeat.
+func (t *Trend) GetInit() error {
+	log.Debug("init get keyword...")
+	t.Keyword = map[string]int{}
+	t.RelKeyword = map[string]map[string]Attrs{}
+	err := t.GetRealTimeKeyword1() //keyzard
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	err = t.GetRealTimeKeyword2() //mzum
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	err = t.GetRelKeyword()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	t.KeywordData = t.Keyword
+	t.RelKeywordData = t.RelKeyword
+	return nil
+}
+
+// Run starts countbeat.
 func (t *Trend) Run() error {
 	log.Debug("running get keyword...")
-	tickerGetKeyWord := time.NewTicker(conf.Collect)
+	tickerGetKeyWord := time.NewTicker(conf.Collect * time.Second)
 	for {
 		select {
 		case <-t.done:
@@ -87,8 +112,6 @@ func (t *Trend) Run() error {
 			return nil
 		case <-tickerGetKeyWord.C:
 			log.Info("ticker=> GetKeyWord")
-			t.KeywordData = t.Keyword
-			t.RelKeywordData = t.RelKeyword
 			t.Keyword = map[string]int{}
 			t.RelKeyword = map[string]map[string]Attrs{}
 			err := t.GetRealTimeKeyword1() //keyzard
@@ -106,6 +129,9 @@ func (t *Trend) Run() error {
 				log.Error(err)
 				continue
 			}
+			t.KeywordData = t.Keyword
+			t.RelKeywordData = t.RelKeyword
+
 			continue
 		}
 	}
@@ -221,7 +247,7 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 
 //doRequest ...
 func (t *Trend) doRequest(method, url string, in, out interface{}) (http.Header, error) {
-	log.Debugf("[%+v] [%+v]", method, url)
+	//log.Debugf("[%+v] [%+v]", method, url)
 	var inbody []byte
 	var body *bytes.Buffer
 	var req *http.Request
@@ -251,8 +277,9 @@ func (t *Trend) doRequest(method, url string, in, out interface{}) (http.Header,
 			return nil, errReq
 		}
 		buf, _ := ioutil.ReadAll(resp.Body)
-		msg := fmt.Sprintf("doRequest() error: [%+v] [%+v]", errReq, string(buf))
-		log.Errorf(msg)
+		log.Error(errReq)
+		log.Error(string(buf))
+		log.Errorf("[%+v][%v]", in, out)
 		return nil, errReq
 
 	}
