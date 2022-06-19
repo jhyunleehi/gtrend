@@ -436,14 +436,16 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 
 ### step6  키워드 화면 표시
 
-### 
 
+
+![image](https://user-images.githubusercontent.com/13324737/174476775-19740eee-0e63-4196-9041-e4a6ab1ec950.png)
 
 
 
 
 ### step7. Web 서비스
 
+![image](https://user-images.githubusercontent.com/13324737/174476760-fd70da66-772c-4360-ad70-feb5c95d137e.png)
 
 
 
