@@ -1,11 +1,8 @@
 package trend
 
 import (	
-	"os"	
-
-	"github.com/go-echarts/go-echarts/v2/charts"
+	"os"		
 	"github.com/go-echarts/go-echarts/v2/opts"
-	"github.com/go-echarts/go-echarts/v2/types"
 	log "github.com/sirupsen/logrus"
 )
 

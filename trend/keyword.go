@@ -208,7 +208,7 @@ func (t *Trend) GetRelKeywordItem(searchword string) error {
 	skey := SearchKeyword{}
 	skey.StartDate = yesterday
 	skey.EndDate = today
-	skey.TopN = 100 //500
+	skey.TopN = 10 //500
 	skey.Period = "1"
 	skey.AnalysisMonths = 0
 	skey.CategorySetName = "SMT"

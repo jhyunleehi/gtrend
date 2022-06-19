@@ -12,9 +12,8 @@ func main() {
 	mytrend = trend.NewTrend("trend")
 	mytrend.GetInit()
 	go mytrend.Run()
-	http.HandleFunc("/", mytrend.AllHandler)
+	http.HandleFunc("/", mytrend.Handler)
 	http.HandleFunc("/wc", mytrend.WcardHandler)
-	http.HandleFunc("/wc", mytrend.GraphHandler)
 	http.ListenAndServe(":8081", nil)
 	fmt.Printf("running server at http://localhost:8081")
 }
